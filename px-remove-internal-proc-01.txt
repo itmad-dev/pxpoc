@@ -1,0 +1,29 @@
+##  test/confirm Portworx Uninstall
+
+# edit storagecluster UninstallAndWipe
+#  add spec.deleteStrategy, type: UninstallAndWipe
+k edit -n portworx stc px-cluster-4fabe82e-7132-4438-846c-136c55244aa2
+
+# delete StorageCluster
+k delete -n portworx stc px-cluster-4fabe82e-7132-4438-846c-136c55244aa2
+
+# note px-node-wiper pods
+
+# confirm only PX operator related objects remaining in portworx namespace
+k get all -n portworx
+
+# delete Portworx operator deployment
+# confirm all objects removed from portworx namespace
+k delete deployment -n portworx portworx-operator
+k get all -n portworx
+
+# !!!
+# vSphere
+#   manually remove VM disks added via PX spec from each worker node
+# EKS
+#   manually remove volumes from EC2 instances
+# !!!
+
+# from worker node(s), confirm disk signatures removed from former PX volumes
+sudo wipefs /dev/sdb -n
+sudo wipefs /dev/sdc -n
