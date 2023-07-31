@@ -1,0 +1,66 @@
+## /var/k8s/px/poc-pds mount
+## official documentation
+#    delete a data service - PDS
+#      https://pds.docs.portworx.com/user-guide/delete-data-service/
+#    remove a Kubernetes cluster and wipe all data – PDS
+#      https://pds.docs.portworx.com/admin-guide/remove-cluster/remove-cluster-wipe-data/
+
+## identify PDS storage allocated, consumed by PDS namespaces
+#  kubectl get pv | grep pds; kubectl get pvc -n pds-system; kubectl get pvc -n pds-demo
+#    pv
+#      NAME = PX volume NAME    # NAME first column
+#      CLAIM = ns/pod
+#    pvc
+#      NAME = pod
+#      VOLUME = pvc
+
+## delete PDS Data Service
+#    overview
+#      Note storage allocated 
+#      Delete Data Service - PDS Data Services Dashboard
+#      Delete pvc(s) associated with data service
+#      Delete pv(s) associated with data service
+#      [optional] manually delete Portworx volumes associated with data service directly from node
+#      [optional] manually delete Portworx volumes associated with data service directly from PX-Central
+
+# far right on deployed Data Service row, click vertical ellipsis, select Delete
+
+https://staging.pds.portworx.com/deployments/list/rabbitmq%20enterprise
+
+# when prompted, manually enter full data service name to confirm permanent deletion
+#  e.g., sql-test-01-zyevj6-0
+
+# upon confirmation of data service deletion, note pv, pvc needed for manual deletion.
+# confirm in pxctl volume list
+
+kubectl get pv | grep sql-test-01-zyevj6 ; kubectl get pvc -n pds-demo | grep sql-test-01-zyevj6
+pxctl volume list
+
+# delete pvc associated with data service
+
+kubectl delete pvc -n pds-demo datadir-sql-test-01-zyevj6-0 
+  persistentvolumeclaim "datadir-sql-test-01-zyevj6-0" deleted
+kubectl delete pvc -n pds-demo sharedbackupsdir-sql-test-01-zyevj6 
+  persistentvolumeclaim "sharedbackupsdir-sql-test-01-zyevj6" deleted
+
+# delete pv associated with data service
+
+kubectl delete pv pvc-43fa274a-52d4-4bda-8435-acf147ccff86 
+kubectl delete pv pvc-7050e6a5-5017-46df-b19e-152c14c52b56 
+
+# [optional] manually delete Portworx volumes associated with data service directly from node
+# [if needed] exec into PX node with volumes to be detached, deleted
+  PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+  kubectl exec $PX_POD -n kube-system --stdin --tty -- /bin/bash
+
+  cd /opt/pwx/bin/
+    pxctl volume list
+    pxctl delete volume pvc-835c4799-7450-42dd-9a3f-9c26ca8f1c1a
+
+# [optional] manually delete Portworx volumes associated with data service directly from PX-Central
+  http://[PX Central url]/lh/cluster/1#nodes_v
+    far right on volume row, click vertical ellipsis, select Delete
+    when prompted, click Delete to confirm deletion
+
+
+
