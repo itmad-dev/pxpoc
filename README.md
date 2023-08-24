@@ -1,7 +1,14 @@
 ### Portworx POC brief procedures
 #### Pre POC Sessions
-- Deployment  
-  Always available
+- PX Central login  
+  central.portworx.com
+  Create account
+- Environment, prerequisites review
+  https://2.13.docs.portworx.com/install-portworx/prerequisites/
+  - Nodes - control plane, workers
+  
+  Create account
+  
   Runs in browser on local host without security  
   Starts automatically upon OS start
 
