@@ -30,7 +30,10 @@
 - PX-Central provisioning
   Add cluster  
   Add cloud credentials, S3 endpoint  
-
+- PX-Backup provisioning
+  Add cluster  
+  Add cloud credentials, S3 endpoint
+- Test backup(s), restore(s)  
 
   
 Edit tanzu-cluster/tkg-cluster-conf.yaml to use the Storage Classes you have configured and make sure the namespace is accurate and save it to your management station.
