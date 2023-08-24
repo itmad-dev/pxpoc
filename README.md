@@ -7,7 +7,15 @@
   - Nodes - control plane, workers
   - Kubernetes version  
       
-
+#### PX First Session
+- Prepare nodes    
+  kvdb labels
+  firewall
+- As needed: namespaces, secrets  
+- PX Operator - create, apply  
+- StorageCluster - create apply
+  As needed - firewall, provisioning troubleshooting  
+  
 Edit tanzu-cluster/tkg-cluster-conf.yaml to use the Storage Classes you have configured and make sure the namespace is accurate and save it to your management station.
 Apply the tanzu-cluster/tkg-cluster-conf.yaml file to your namespace to create a cluster
 Follow VMware guides to connect to the Tanzu cluster with kubectl command:Connect to Tanzu Cluster
