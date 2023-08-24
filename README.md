@@ -2,7 +2,7 @@
 #### Pre POC Sessions
 - PX Central login  
   central.portworx.com
-  create account
+   create account
 - Environment, prerequisites review
   https://2.13.docs.portworx.com/install-portworx/prerequisites/
   - Nodes - control plane, workers
