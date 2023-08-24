@@ -1,7 +1,5 @@
 ### Portworx POC brief procedures
-#### Design Goals  
-
-
+#### Pre POC Sessions
 - Deployment  
   Always available
   Runs in browser on local host without security  
