@@ -16,7 +16,7 @@
 - StorageCluster - create apply  
   As needed - firewall, provisioning troubleshooting  
 - Sample storage provisioning    
-  Storage class(es)
+  Storage class(es)  
   PVC(s)  
 
   
