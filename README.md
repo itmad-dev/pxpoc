@@ -11,6 +11,7 @@
 - Prepare nodes    
   kvdb labels
   firewall
+- Prepare, stage manifests, artifacts  
 - As needed: namespaces, secrets  
 - PX Operator - create, apply  
 - StorageCluster - create apply  
@@ -18,6 +19,18 @@
 - Sample storage provisioning    
   Storage class(es)  
   PVC(s)  
+
+#### PX Second Session - PX-Central, PX-Backup  
+- Prepare, stage manifests, artifacts
+  Specifics: PX-Central version, UI service type  
+- As needed: namespaces, secrets  
+- Helm - apply  
+  As needed - firewall, provisioning troubleshooting
+- PX-Central UI access
+- PX-Central provisioning
+  Add cluster  
+  Add cloud credentials, S3 endpoint  
+
 
   
 Edit tanzu-cluster/tkg-cluster-conf.yaml to use the Storage Classes you have configured and make sure the namespace is accurate and save it to your management station.
