@@ -1,0 +1,108 @@
+## /var/k8s/rhocp/dr-rhocp01 mount to network share
+## artifacts, resources prep
+
+## dr-rhocp01 deployed per lab-rhocp-vsphere-prem-01.txt or equivalent
+
+kubeadmin
+SNTrn-Dkpaq-aSbay-PFNyg
+https://api.dr-rhocp-01.testco.local:6443
+
+
+# confirm portworx-operator-xxx-xx running
+k describe po -n portworx portworx-operator-64dcfdc4b9-sb4ks
+
+##  create px-vsphere-secret
+# encode vSphere credentials for use in secret
+# VSPHERE_USER: echo '<vcenter-server-user>' | base64
+echo administrator@vsphere.local | base64
+YWRtaW5pc3RyYXRvckB2c3BoZXJlLmxvY2FsCg==
+
+#VSPHERE_PASSWORD: Use output of echo '<vcenter-server-password>' | base64
+# echo [password] | base64
+echo [password] | base64
+S2xlaW56YWNoNzY3OSEK
+
+# create px-vsphere-secret.yaml
+# replace VSPHERE_USER, VSPHERE_PASSWORD with base64 values
+# create in same namespace specified in StorageCluster spec; i.e., either create ns or have PX Operator create ns
+# vi /home/testcoadmin/px/px-vsphere-secret.yaml
+cd /home/testcoadmin/px
+k apply -f px-vsphere-secret.yaml
+
+
+https://docs.portworx.com/install-portworx/openshift/openshift-vsphere/
+From your OpenShift UI, select OperatorHub in the left pane.
+
+# from CONTROL PLANE NODE label nodes for PX KVDB device with px/metadata-node=true
+k label nodes dr-rhocp01-w01.dr-rhocp01.testco.local dr-rhocp01-w02.dr-rhocp01.testco.local dr-rhocp01-w03.dr-rhocp01.testco.local px/metadata-node=true
+
+## from CENTRAL.PORTWORX.COM, create and save Portworx Operator and StorageCluster specs
+# Select Your Platform
+#   Platform: vSphere
+#     Note: default Portworx vSphere platform behavior is to dynamically provision and manage storage using vSphere's API.
+# [Go directly to] Summary
+#   Click Customize
+# Basic
+#   Use the Portworx Operator [selected]
+#   Portworx version: [latest]
+#   Kubernetes version: [based on below command from CONTROL PLANE NODE]
+#     kubectl version --short | awk -Fv '/Server Version: / {print $3}'
+#   Namespace: portworx
+#   etcd: built-in
+# Click Next
+# Storage
+# Select Cloud Platform: vSphere
+# Configure storage devices
+#   Select type of disk: Create using a Spec
+#     kvdb device: Thin
+#       Size (GB): 32
+#     [New volume type]: Thin
+#       Size (GB): 300
+#     Max storage nodes per availability zone: 8
+#     auto create journal device [selected]
+#     vCenter Endpoint: 10.1.2.120
+#     vCenter Port: 443
+#     vCenter Datastore Prefix: or-dsvsphere-01
+#     Kubernetes Secret Name: px-vsphere-secret
+# Click Next
+# Network
+#   data network interfaces: auto
+#   management network interface: auto
+#   advanced, starting port for Portworx services: 9001
+# Click Next
+# Customize
+#   Are you running on [...] OpenShift 4+ : [selected]
+# environment variables none
+# registry and image settings 
+# security settings enabling authorization [not selected]
+# enable stork, CSI, monitoring [telemetry not selected]
+# cluster name prefix px-cluster
+# secrets store type kubernetes
+# Click Finish
+# Spec Name: dr-rhocp01
+# Spec Tags: dr-rhocp01
+
+## OpenShift Console
+# Operators
+#  OperatorHub
+#    Filter: Portworx
+#    [select] Portworx Enterprise
+#      Select Install
+#        Update channel: stable
+#        Installation mode: A specific namespace   portworx
+#        Update approval:  Automatic
+#   Installing Operator
+#   "Installed operator: custom resource required
+#  OpenShift Console
+#   Operators, Installed Operators
+#     Confirm:
+#       Status: Succeeded
+#       Namespace:  portworx
+#  
+#  oc/kubectl cli:
+#    kubectl apply -f 'https://install.portworx.com/2.13?#      operator=true&mc=false&kbver=1.26.3&ns=portworx&b=true&kd=type%3Dthin%2Csize
+#      %3D32&mz=8&vsp=true&vc=10.2.6.5&vcp=443&ds=dr-dsvsphere-01&s=%22type%3Dthin%2Csize%3D150%22&c=px-#      cluster-4ee9ecce-895f-49c2-9755-#      dea30a99f574&osft=true&stork=true&csi=true&mon=true&tel=true&st=k8s&promop=true'
+
+
+
+

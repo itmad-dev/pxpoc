@@ -1,0 +1,52 @@
+## /var/k8s/rhocp/dr-rhocp-01 mount to network share
+## artifacts, resources prep
+
+kubeadmin
+SNTrn-Dkpaq-aSbay-PFNyg
+https://api.dr-rhocp-01.testco.local:6443
+
+##  DNS preparation
+
+#  Subdomain
+dr-rhocp01.testco.local
+
+# A records for OCP api, apps, control plane and worker nodes
+10.2.6.202  pds-mssql.dr-rhocp01.testco.local
+
+##  IP preparation
+
+#  dr-rhocp-01 range designated for external devices, lb  .200 - .205
+10.2.6.202 - .205
+
+##  Service preparation
+k get svc -n pds-demo sql-db-test-01-3a7p7f-pds-demo-0-vip -o yaml > sql-db-test-01-3a7p7f-pds-demo-0-vip_pre-edit_06072023.yaml
+
+# Create or modify service to validate load balancer
+k edit svc -n pds-demo sql-db-test-01-3a7p7f-pds-demo-0-vip  
+  Type: from ClusterIP to LoadBalancer
+  NodePort values added for each TargetPort
+
+##  MetalLB Operator deployment
+
+# dr-rhocp01 OpenShift console
+  OperatorHub
+  MetalLB Operator
+    v4.12.0-202305171328
+    Click Install
+  Install Operator
+    Click Install
+
+# k get all,secret,pvc -n metallb-system
+
+##  MetalLB instance
+
+# k apply -f metallb.yaml
+# k get all,secret,pvc -n metallb-system
+
+##  MetalLB IPAddressPool
+
+k apply -f ip-addresspool-dr-rhocp01.yaml
+
+
+
+##  Testing, Validation
