@@ -4,8 +4,9 @@
   central.portworx.com - create account  
 - Environment, prerequisites review  
   https://2.13.docs.portworx.com/install-portworx/prerequisites/  
-  - Nodes - control plane, workers  
-  
+  - Nodes - control plane, workers
+  - Kubernetes version  
+      
   Create account
   
   Runs in browser on local host without security  
