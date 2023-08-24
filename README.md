@@ -13,7 +13,7 @@
   firewall
 - As needed: namespaces, secrets  
 - PX Operator - create, apply  
-- StorageCluster - create apply
+- StorageCluster - create apply  
   As needed - firewall, provisioning troubleshooting  
   
 Edit tanzu-cluster/tkg-cluster-conf.yaml to use the Storage Classes you have configured and make sure the namespace is accurate and save it to your management station.
