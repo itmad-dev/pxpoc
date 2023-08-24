@@ -1,0 +1,19 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'relay.dnsexit.com:2525'
+  smtp_from: 'testcoadmin@testcolab.com'
+  smtp_auth_username: 'ranrelay'
+  smtp_auth_password: 'relay7679'
+route:
+  group_by: ['alertname']
+  # Send all notifications to me.
+  receiver: 'email-me'
+receivers:
+- name: 'email-me'
+  email_configs:
+  - to: 'testcoadmin@testcolab.com'
+    from: 'k8sadmin@testcolab.com'
+    smarthost: relay.dnsexit.com:2525
+    auth_username: 'ranrelay'
+    auth_identity: 'ranrelay'
+    auth_password: 'relay7679'
