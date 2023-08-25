@@ -21,16 +21,16 @@
   PVC(s)  
 
 #### PX Second Session - PX-Central, PX-Backup  
-- Prepare, stage manifests, artifacts
+- Prepare, stage manifests, artifacts  
   Specifics: PX-Central version, UI service type  
 - As needed: namespaces, secrets  
 - Helm - apply  
-  As needed - firewall, provisioning troubleshooting
-- PX-Central UI access
-- PX-Central provisioning
+  As needed - firewall, provisioning troubleshooting  
+- PX-Central UI access  
+- PX-Central provisioning  
   Add cluster  
   Add cloud credentials, S3 endpoint  
-- PX-Backup provisioning
+- PX-Backup provisioning  
   Add cluster  
-  Add cloud credentials, S3 endpoint
+  Add cloud credentials, S3 endpoint  
 - Test backup(s), restore(s)  
