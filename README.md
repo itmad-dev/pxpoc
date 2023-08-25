@@ -29,8 +29,8 @@
 - PX-Central UI access  
 - PX-Central provisioning  
   Add cluster  
-  Add cloud credentials, S3 endpoint  
+  Add cloud credential(s), S3 endpoint(s)  
 - PX-Backup provisioning  
   Add cluster  
-  Add cloud credentials, S3 endpoint  
+  Add cloud credential(s), S3 endpoint(s) 
 - Test backup(s), restore(s)  
