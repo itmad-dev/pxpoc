@@ -1,0 +1,10 @@
+
+# This process takes place during the Portworx cluster provisioning, once the px-cluster pods are far enough deployed to exec into the portworx container and execute iptables command.
+
+kubectl get pods -n portworx -l name=portworx | grep -v NAME | awk '{print $1}'
+px-cluster-2a776b08-8fc4-42e1-8e98-833955653ecb-5v77t
+px-cluster-2a776b08-8fc4-42e1-8e98-833955653ecb-fvwhz
+px-cluster-2a776b08-8fc4-42e1-8e98-833955653ecb-pp8mf
+px-cluster-2a776b08-8fc4-42e1-8e98-833955653ecb-t629b
+
+kubectl exec -t -n portworx px-cluster-xxxx-xxxxx-xxxxxx -- nsenter --mount=/host_proc/1/ns/mnt bash -c   "iptables -A INPUT -p tcp --match multiport --dports 9001:9020 -j ACCEPT"
