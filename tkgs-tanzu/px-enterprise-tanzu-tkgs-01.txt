@@ -1,0 +1,60 @@
+# stage manifests, artifacts
+# environment review
+# Portworx pre-requisites:
+#  https://docs.portworx.com/portworx-enterprise/install-portworx/prerequisites.html
+# PX, deployment scripts
+#. https://github.com/itmad-dev/pxpoc/tree/main/scripts-general
+
+# label nodes for PX KVDB device with px/metadata-node=true
+#   use label-px-kvdb-by-worker-arg.sh or equivalent
+kubectl label nodes [node name] [node name]  px/metadata-node=true
+
+## from CENTRAL.PORTWORX.COM, create and save Portworx Operator and StorageCluster specs
+# see https://github.com/itmad-dev/pxpoc/blob/main/tkgs-tanzu/TanzuTKGS_PXClusterSpecExample.jpg
+
+# create portworx namespace, clusterrole, rolebinding
+kubectl create rolebinding rolebinding-default-privileged-sa-ns_default --namespace=portworx --clusterrole=psp:vmware-system-privileged --group=system:serviceaccounts
+
+# deploy Portworx Operator spec
+# 
+kubectl apply -f 'https://install.portworx.com/2.13?comp=pxoperator&kbver=X.XX&ns=portworx'
+
+# prepare/stage px-tanzu-portworx-pod-iptables-exec.txt
+# gather portworx pod names
+# when px-cluster pods are far enough deployed to exec into the portworx container and execute iptables command.
+
+# deploy StorageCluster spec
+# 
+kubectl apply -f https://install.portworx.com/?operator=true&mc=false&kbver=X.XX&ns=portworx [... etc.]
+
+
+# verify StorageCluster created
+#  use px-initwatch.sh or equivalent
+kubectl get storagecluster -n portworx
+
+# verify StorageNodes status
+kubectl get storagenodes -n portworx
+
+# verify all PX pods running
+kubectl get pods -n portworx -o wide
+
+# verify PX StorageClass objects
+kubectl get sc
+
+# deploy, use pxtl script
+# px-pxctl.sh
+
+# verify pxctl cluster status on a storage node
+pxctl status
+
+# get pool status from a PX node
+pxctl service pool show
+
+# In vSphere provisioned storage, list PX disks, datastores, VMDKs
+pxctl clouddrive list
+
+# get volume list from a PX node
+pxctl volume list
+
+# inspect specific volume from a PX node
+pxctl volume inspect pvc-e2d8aeb9-9eef-4af2-9774-f455dab689ce
