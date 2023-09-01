@@ -1,0 +1,242 @@
+# stage manifests, artifacts
+# environment review
+# PX-Central, PX-Backup pre-requisites:
+#  https://backup.docs.portworx.com/install/on-premise/install-prereq/
+# PX-Central, PX-Backup deployment scripts, artifacts
+#. https://github.com/itmad-dev/pxpoc/tree/main/scripts-general
+
+# [If needed] install Helm
+sudo snap install helm --classic
+
+## px-central on-premises, px-backup component enabled
+
+# create StorageClass
+kubectl apply -f pxd-portworx-sc.yaml or equivalent
+
+# from https://central.portworx.com
+#   Product Catalog, Portworx px-backup, On-premises, click Continue
+#   Backup Version: 2.5.0
+#   Namespace: central
+#   Install using helm 3
+#   Environment: On-Premises
+#   Storage class name: pxd-portworx-sc
+#   Use your OIDC [not selected]
+#   Use custom registry [not selected]
+#   click Next
+
+# add portworx repository to portworx helm path, update local help repo
+helm repo add portworx http://charts.portworx.io/ && helm repo update
+
+# create central namespace, clusterrole, rolebinding
+kubectl create ns central
+kubectl create rolebinding rolebinding-default-privileged-sa-ns_default --namespace=central --clusterrole=psp:vmware-system-privileged --group=system:serviceaccounts
+
+# download, save created values-px-central.yaml
+#   this will facilitate local updates, reuse
+# update UI service types as needed
+# ! recommend LoadBalancer for:
+#    pxBackupUIServiceType
+#    grafanaServiceType
+# service: 
+#    pxCentralUIServiceType: "LoadBalancer"
+#    pxBackupUIServiceType: "LoadBalancer"
+#    grafanaServiceType: "NodePort"
+#    cortexNginxServiceType: "NodePort"
+
+# run px-central helm install against modifed cluster-specific local values-px-central.yaml
+# creates and installs to central namespace
+# ! note remove "--create-namespace"
+helm install px-central portworx/px-central --namespace central  --version 2.5.0 -f tanzu-values-px-central_2.5.0_uisvctype-loadbalancer.yaml
+
+# monitor readiness of central namespace all objects, pvcs
+# Note in particular status of pod/pxcentral-post-install-hook-xxxxx which may take 15+ minutes to get to Completed status
+kubectl get all,pvc -n central -o wide	
+
+## preliminary LoadBalancer connection, review of PX-Backup UI
+kubectl describe svc -n central px-backup-ui
+
+# change password to activate account
+# update user profile email, first/last names to activate account
+# Note: see oidc section for preliminary default user with px-backup-infra-admin role assignment [modifed cluster-specific local values-px-central.yaml]
+
+# review default user profile details
+http://[LoadBalancer IP]/profile
+
+# Name, account, account provider
+# Org ID
+# Group(s)
+# PX-Central Role(s)
+# PX-Backup Role(s)
+
+# review service status
+http://[LoadBalancer IP]/dashboard/status
+
+# list of services, status, number of pods deployed
+# PX-Central API
+# PX-Central-FrontEnd
+# PX-Central-Backend
+# PX-Backup
+# PX-Central-Onprem
+# PX-Central-Auth-Service
+
+# px-backup-security – review default role mapping, roles
+http://[LoadBalancer IP]/pxBackup/rbac
+
+# review license status
+http://[LoadBalancer IP]/license
+
+## validate Prometheus components and basic operations
+# verify Prometheus pods and services running
+kubectl get pods -n portworx -A -o wide | grep -i prometheus
+
+## validate Grafana components and basic operations
+
+## Grafana dashboard configmaps creation
+#    (3) separate operations to create (1) configmap each for
+#      dashboard configuration
+#      dashboard datasource
+#      PX dashboard content 
+
+#  dashboard configuration configmap
+#  ! if needed, and artifacts aren't staged
+#    download grafana-dashboard-config.yaml
+#      curl -O https://docs.portworx.com/samples/k8s/pxc/grafana-dashboard-config.yaml
+#  create grafana-dashboard-config ConfigMap – Note: leave apiVersion at 1, not v1
+kubectl -n portworx create configmap grafana-dashboard-config --from-file=grafana-dashboard-config.yaml
+
+#  datasource configmap
+#  ! if needed, and artifacts aren't staged
+#    download grafana-datasource.yaml
+#      curl -o https://docs.portworx.com/samples/k8s/pxc/grafank a-datasource.yaml
+#  create grafana-datasource ConfigMap
+kubectl -n portworx create configmap grafana-source-config --from-file=grafana-datasource.yaml
+
+#  PX dashboard content configmap
+#    download (5) PX dashboard content json files; confirm approximate file sizes
+#      21601 portworx-cluster-dashboard.json
+#      34905 portworx-node-dashboard.json
+#      62078 portworx-volume-dashboard.json
+#     134585 portworx-performance-dashboard.json
+#      31949 portworx-etcd-dashboard.json
+
+#  ! if needed, and artifacts aren't staged
+#    download grafana-datasource.yaml
+#      curl "https://docs.portworx.com/samples/k8s/pxc/portworx-cluster-dashboard.json" -o portworx-cluster-dashboard.json && curl "https://docs.portworx.com/samples/k8s/pxc/portworx-node-dashboard.json" -o portworx-node-dashboard.json && curl "https://docs.portworx.com/samples/k8s/pxc/portworx-volume-dashboard.json" -o portworx-volume-dashboard.json && curl "https://docs.portworx.com/samples/k8s/pxc/portworx-performance-dashboard.json" -o portworx-performance-dashboard.json && curl "https://docs.portworx.com/samples/k8s/pxc/portworx-etcd-dashboard.json" -o portworx-etcd-dashboard.json
+#  create grafana-dashboards ConfigMap
+kubectl -n portworx create configmap grafana-dashboards --from-file=portworx-cluster-dashboard.json --from-file=portworx-performance-dashboard.json --from-file=portworx-node-dashboard.json --from-file=portworx-volume-dashboard.json --from-file=portworx-etcd-dashboard.json
+
+# apply grafana.yaml modfied from https://docs.portworx.com/samples/k8s/pxc/grafana.yaml
+#  portworx namespace
+kubectl apply -f grafana_portworx_loadbalancer.yaml
+
+# check status of grafana pods
+kubectl get po -A | grep grafana
+
+# confirm grafana login from outside the cluster using hostname px-grafana-XX.[domain] and NodePort
+http://[LoadBalancer]:3000
+
+# review grafana
+# Portworx cluster dashboard
+General, Dashboards, Portworx Cluster Dashboard
+
+# Portworx node dashboard
+General, Dashboards, Portworx Node Dashboard
+
+# install Node Exporter
+# required for Grafana to measure various machine resources such as, memory, disk, and CPU utilization
+# Note: namespace same as where Prometheus, Grafana deployed
+kubectl apply -f node-exporter.yaml
+
+# create a NodeExporter service
+# Note: namespace same as where Prometheus, Grafana deployed
+kubectl apply -f node-exporter-svc.yaml
+
+# create a Service Monitor - modified to inlclude namespace where Prometheus, Grafana deployed
+# The serviceMonitorSelector object is automatically appended to the prometheus object that is deployed by the Portworx Operator. The ServiceMonitor will match any serviceMonitor that has the key prometheus and value of portworx or backup
+# view dashboards in Grafana with Node Exporter values
+# Portworx Performance Dashboard: System – Storage IO Rate; System Network Send/Received; Volume Latency, IOPS, Throughput
+kubectl apply -f node-exporter-svcmonitor.yaml
+
+## Lighthouse
+# add PX Cluster  http://[LoadBalancer IP]/lh/addCluster
+# PX Cluster Details
+#   cluster name: user friendtly name
+#   cluster endpoint: [worker node IP]:9001-9021 # verify; cluster UUID autofills [1e6398f4]-[294e]-[433c]-[8cf2]-[789b2a8df7cd] # from pxctl status - Cluster Summary
+#   metrics url: leave blank 
+# Cluster Security
+#   PX Security: none
+
+# review nodes, volumes, pools, drives
+# all nodes or selected nodes; click node again to de-select
+# select node Node info for node details
+# select volume for volume details
+# select View Volume Analyzer for hierarchical levels of volume performance tiers, file/folder/subfolder: names, modified time, size
+# refreshable, real time data
+
+
+## create/configure S3 bucket including object lock wasabi – https://console.wasabisys.com/#/file_manager
+# create s3 bucket
+# name: px-testcolab-01
+# region: Oregon us-west-1
+# Bucket versioning: [selected]
+# Bucket Logging: [not selected]
+# Enable Object Locking: [selected]
+
+# [if needed] Wasabi – Access Keys create/download
+
+##  configure cloud credentials
+# add cloud account - http://px-backup-XX.[domain]:[NodePort]/pxBackup/cloudSettings
+# Cloud provier: AWS/SW Compliant Object Store
+# Cloud account name: wasabi-px-testcolab-01
+# Access key: [cloud provider access key]
+[REDACTED]
+# Secret key: [cloud provider secret key]
+[REDACTED]
+
+## configure a backup target location
+# http://px-backup-XX.[domain]:[NodePort]/pxBackup/addLocation
+# name: px-testcolab-01
+# Cloud account: wasabi-px-testcolab-01
+# Path/Bucket: or-cluster-backups-01  # will create if one doesn't exist
+# Encryption Key: [blank]
+# region: us-west-1
+# endpoint: s3.us-west-1.wasabisys.com
+# disable SSL; [not selected]
+# storage class: Standard
+
+##  add cluster backup source to backup from and restore to
+#  http://[LoadBalancer IP]/pxBackup/clusterDiscovery/addCluster
+#  Select Kubernetes Platform
+#    Others [all cluster manually using kubeconfig]
+# cluster name: [user friendly]
+# [output from: kubectl config view --flatten --minify}
+# Click Add Cluster
+
+# drill into newly added cluster, confirm:
+# applications
+#   namespaces
+#   object types
+
+##  create a backup rule
+# http://[LoadBalancer IP]/pxBackup/rules
+# http://[LoadBalancer IP]/pxBackup/addBackupRule
+# rule name: [user friendly]
+# pod selector: 
+# container: [none]
+# action: echo "test"
+#   background: [selected]
+
+
+## create schedule policies
+# http://[LoadBalancer IP]/pxBackup/schedules
+# policy name: qed-daily-01
+# type: Daily
+#   Hours: 01:00 AM
+#   Retain: 7
+#   Incremental Count: 6  #  [PX Volumes only]
+
+## create and restore backups
+
+## PX-Backup Uninstall
+helm delete px-central --namespace central
+kubectl delete namespace central
