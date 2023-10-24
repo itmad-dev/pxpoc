@@ -9,7 +9,7 @@
       
 #### PX First Session
 - Prepare nodes    
-  kvdb labels
+  kvdb labels  
   firewall
 - Prepare, stage manifests, artifacts  
 - As needed: namespaces, secrets  
