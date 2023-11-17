@@ -20,7 +20,7 @@ YWRtaW5pc3RyYXRvckB2c3BoZXJlLmxvY2FsCg==
 #VSPHERE_PASSWORD: Use output of echo '<vcenter-server-password>' | base64
 # echo [password] | base64
 echo [password] | base64
-S2xlaW56YWNoNzY3OSEK
+[REDACTED]
 
 # create px-vsphere-secret.yaml
 # replace VSPHERE_USER, VSPHERE_PASSWORD with base64 values
