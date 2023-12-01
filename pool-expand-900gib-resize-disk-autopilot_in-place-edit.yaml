@@ -1,0 +1,28 @@
+apiVersion: autopilot.libopenstorage.org/v1alpha1
+kind: AutopilotRule
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"autopilot.libopenstorage.org/v1alpha1","kind":"AutopilotRule","metadata":{"annotations":{},"name":"pool-expand-200gib-resize-disk-autopilot"},"spec":{"actions":[{"name":"openstorage.io.action.storagepool/expand","params":{"scalepercentage":"50","scaletype":"resize-disk"}}],"conditions":{"expressions":[{"key":"px_pool_stats_total_bytes/(1024*1024*1024)","operator":"Lt","values":["200"]}]},"enforcement":"required"}}
+  creationTimestamp: "2023-12-01T04:26:06Z"
+  finalizers:
+  - autopilot.libopenstorage.org/delete
+  generation: 3
+  name: pool-expand-200gib-resize-disk-autopilot
+  resourceVersion: "7673188"
+  uid: ea15a739-8288-42bf-8c1b-2e19a06d550e
+spec:
+  actions:
+  - name: openstorage.io.action.storagepool/expand
+    params:
+      scalepercentage: "50"
+      scaletype: resize-disk
+  conditions:
+    expressions:
+    - key: px_pool_stats_total_bytes/(1024*1024*1024)
+      operator: Lt
+      values:
+      - "900"
+  enforcement: required
+  namespaceSelector: {}
+  selector: {}
