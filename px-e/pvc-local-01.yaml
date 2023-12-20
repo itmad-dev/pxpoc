@@ -6,7 +6,7 @@ metadata:
 spec:
   storageClassName: pxd-portworx-sc
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 2Gi
