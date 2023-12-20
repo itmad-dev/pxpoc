@@ -3,7 +3,7 @@
 - PX Central login  
   central.portworx.com - create account  
 - Environment, prerequisites review  
-  https://2.13.docs.portworx.com/install-portworx/prerequisites/  
+  https://3.0.docs.portworx.com/install-portworx/prerequisites/  
   - Nodes - control plane, workers
   - Kubernetes version  
       
