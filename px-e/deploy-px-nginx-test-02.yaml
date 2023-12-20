@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: px-nginx-test-02
+  labels:
+    app: px-nginx-test-02
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: px-nginx-test-02
+  template:
+    metadata:
+      labels:
+        app: px-nginx-test-02
+    spec:
+      containers:
+        - name: px-nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              name: "http-server"
+          volumeMounts:
+            - mountPath: "/usr/share/nginx"
+              name: vol-px-01
+      volumes:
+        - name: vol-px-01
+          persistentVolumeClaim:
+           claimName: pvc-vsphere-01

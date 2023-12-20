@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: px-nginx-qio-test
+spec:
+  volumes:
+    - name: vol-px-01
+      persistentVolumeClaim:
+        claimName: pvc-local-01
+  containers:
+    - name: px-nginx-qio-test
+      image: quay.io/bitnami/nginx:latest
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx"
+          name: vol-px-01
+
