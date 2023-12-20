@@ -2,11 +2,10 @@
 #   https://docs.portworx.com/portworx-enterprise/install-portworx/kubernetes/azure/aks.html  
 
 # from CONTROL PLANE NODE label nodes for PX KVDB device with px/metadata-node=true
-k label nodes or-cluster02-w01 or-cluster02-w02 or-cluster02-w03 or-cluster02-w04  px/metadata-node=true
+k label nodes [worker node list]  px/metadata-node=true
 
 ## from CENTRAL.PORTWORX.COM, create and save Portworx Operator and StorageCluster specs
-# Select Platform: vSphere, Customize
-#  Note: default Portworx vSphere platform behavior is to dynamically provision and manage storage using vSphere's API.
+# Select Platform: Azure, Customize
 # Basic
 #  Use the Portworx Operator [selected]
 # PX version [latest]
