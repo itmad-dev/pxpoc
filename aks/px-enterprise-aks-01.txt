@@ -1,2 +1,32 @@
 # Azure Kubernetes Service (AKS) on PX  
 #   https://docs.portworx.com/portworx-enterprise/install-portworx/kubernetes/azure/aks.html  
+
+# from CONTROL PLANE NODE label nodes for PX KVDB device with px/metadata-node=true
+k label nodes or-cluster02-w01 or-cluster02-w02 or-cluster02-w03 or-cluster02-w04  px/metadata-node=true
+
+## from CENTRAL.PORTWORX.COM, create and save Portworx Operator and StorageCluster specs
+# Select Platform: vSphere, Customize
+#  Note: default Portworx vSphere platform behavior is to dynamically provision and manage storage using vSphere's API.
+# Basic
+#  Use the Portworx Operator [selected]
+# PX version [latest]
+# k8s version [kubectl version]
+# namespace kube-system
+# etcd built-in
+# OnPremises
+# manually specified disks
+# drive/device: /dev/sdc
+# auto create journal device [selected]
+# skip kvdb device [not selected]  /dev/sdb
+# data network interfaces: auto
+# management network interface: auto
+# advanced, starting port for Portworx services: 9001
+# customize none
+# environment variables none
+# registry and image settings 
+# security settings enabling authorization [not selected]
+# enable stork, CSI, monitoring, telemetry
+# cluster name prefix px-cluster
+# secrets store type kubernetes
+# Spec Name: or-cluster01Spec1
+# Spec Tags: or-cluster01
