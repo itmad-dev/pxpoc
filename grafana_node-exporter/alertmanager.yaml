@@ -1,9 +1,9 @@
 global:
   # The smarthost and SMTP sender used for mail notifications.
-  smtp_smarthost: 'relay.dnsexit.com:2525'
-  smtp_from: 'testcoadmin@testcolab.com'
-  smtp_auth_username: 'ranrelay'
-  smtp_auth_password: 'relay7679'
+  smtp_smarthost: '[REDACTED]'
+  smtp_from: '[REDACTED]'
+  smtp_auth_username: '[REDACTED]'
+  smtp_auth_password: '[REDACTED]'
 route:
   group_by: ['alertname']
   # Send all notifications to me.
