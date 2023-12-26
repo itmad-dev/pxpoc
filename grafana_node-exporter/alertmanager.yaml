@@ -13,7 +13,7 @@ receivers:
   email_configs:
   - to: 'testcoadmin@testcolab.com'
     from: 'k8sadmin@testcolab.com'
-    smarthost: relay.dnsexit.com:2525
-    auth_username: 'ranrelay'
-    auth_identity: 'ranrelay'
-    auth_password: 'relay7679'
+    smarthost: '[REDACTED]'
+    auth_username: '[REDACTED]'
+    auth_identity: '[REDACTED]'
+    auth_password: '[REDACTED]'
