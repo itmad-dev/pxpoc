@@ -1,8 +1,17 @@
 ##  test/confirm Portworx Uninstall
 
+
+##### manual method ######
 # edit storagecluster UninstallAndWipe
 #  add spec.deleteStrategy, type: UninstallAndWipe
 k edit -n portworx stc px-cluster-4fabe82e-7132-4438-846c-136c55244aa2
+##### manual method ######
+
+##### streamlined method ######
+export STC=`kubectl -n portworx get stc | grep -v NAME | cut -f1 -d' '`
+kubectl -n portworx patch stc $STC --type=merge --patch '{"spec":{"deleteStrategy":{"type":"UninstallAndWipe"}}}'
+##### streamlined method ######
+
 
 # delete StorageCluster
 k delete -n portworx stc px-cluster-4fabe82e-7132-4438-846c-136c55244aa2
