@@ -1,0 +1,86 @@
+# PX-Enterprise cluster running
+
+## eks PDS Deployment target provisioning
+# Installation pre-requisites
+https://pds.docs.portworx.com/prerequisites/
+
+# node storage preparation
+# Note: same on or-cluster01-node01, 02, 03, 04
+lsblk
+
+# px cluster status
+pxctl status
+
+# px cluster provision status
+pxctl cluster provision-status
+
+# cluster namespace prep, label - cluster namespace where databases will be deployed
+kubectl create namespace pds-demo
+kubectl label namespace pds-demo pds.portworx.com/available=true
+kubectl get namespace pds-demo --show-labels
+
+# cluster ID
+# d59fa4bd-2e83-4c4b-819b-54d8d0124550
+kubectl get namespace kube-system -o yaml
+
+# [If needed] install Helm
+sudo snap install helm --classic
+
+# staging.pds.portworx.com deployment target - cluster namespace where PDS components will be deployed
+# Note: back rev Helm et al as needed
+
+helm install --create-namespace --namespace=pds-system pds pds-target --repo=https://pds.pure-px.io/charts/target --version=1.23.3 --set tenantId=fb942f2c-d185-4c8a-97a5-bb7f348aa2a0 --set bearerToken=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5pbCIsImV4cCI6MCwiaWF0IjoxNjY1NDE3MzMwLCJpc3MiOiJwZHMiLCJuYW1lIjoiRGVmYXVsdC1BZ2VudFdyaXRlciIsInJvbGVzIjpudWxsLCJzdWIiOiIyNWM2OTk1OS1hY2JmLTRiMjYtYWJkNy03YzlkNjc2M2Y3NjUifQ.THl-o9-8VMvbR2DQIDwu-95VVXCqQ3LKb3JPqcHU97_DEr8mMjSCttlOfuKxkEv02EcCHu7KWrQ2pOvFRRR0mg --set apiEndpoint=https://staging.pds.portworx.com/api
+
+# staging.pds.portworx.com cluster ID to cluster name
+https://staging.pds.portworx.com/settings/deployment-targets
+
+## PDS Architecture, pds-system initial components
+kubectl  get all,pvc,sc -n pds-system
+
+## postgreSQL to aws-usw1-eks-01
+# from https://staging.pds.portworx.com/deployments/list/mongodb%20enterprise, select PostgreSQL, click Deploy
+# version: 15.5
+# Deployments
+#   Name: eks-01
+#   Target: aws-usw1-eks-01
+#   Namespace: pds-demo
+#   Provision load balancer [selected]
+# Application Configuration
+#   Default
+# Size
+#   Resource Settings: Small 1-2 CPU, 2G-4G mem, 100G storage
+#   No. of nodes: 2
+# Storage Options
+#   Volume replication (best-effort spread); XFS, auto-detect, replication factor: 2
+# Backup
+#   No Scheduled Backups 
+#
+# click Deploy
+
+# upon successful deployment
+# connection
+pg-eks-01-bfbgq7-pds-demo.sales-staging.pds-dns.io
+pg-eks-01-bfbgq7-pds-demo-0-vip.sales-staging.pds-dns.io
+pg-eks-01-bfbgq7-pds-demo-1-vip.sales-staging.pds-dns.io
+Ports
+  PATRONI 8009
+  POSTGRESQL  5432
+  SSHD  2022
+User name: pds
+Password: Rm22sTs0S0sYjoD9XfRDpZsFNFr728x02QFSJSmo
+# configuration
+# DNS Zone: sales-staging.pds-dns.io
+# Load Balancer Source Ranges: All incoming traffic allowed
+
+# resources
+# CPU
+#   Request: 1
+#   Limit: 2
+# Memory
+#   Request: 2G
+#   Limit: 4G
+# Storage
+#   Request: 100G 
+
+# get components from pds-demo deployment target namespace
+k get all,pvc,pv,sc -n pds-demo
