@@ -9,7 +9,7 @@ kubectl apply -f portworx-sc.yaml
 # namespace: central
 # install using helm 3
 # cloud
-# storage class name: portworx-sc
+# storage class name: pxd-portworx-sc
 # use your OIDC [not selected]
 # use custom registry [not selected]
 # download values-px-central.yaml
@@ -22,7 +22,7 @@ helm repo add portworx http://charts.portworx.io/ && helm repo update
 # ! the default ui svc type is LoadBalancer, which in cloud creates public endpoints
 #   modify these in the yaml file to NodePort and create non-public ingress as needed
 # creates and installs to central namespace
-helm install px-central portworx/px-central --namespace central  --version [version] -f values-px-central.yaml
+helm install px-central portworx/px-central --namespace central  --version [version] -f values-px-central_[version]_uisvctype-loadbalancer.yaml
 
 # monitor readiness of central namespace all objects, pvcs
 # Note in particular status of pod/pxcentral-post-install-hook-xxxxx which may take 15+ minutes to get to Completed status
