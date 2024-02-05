@@ -3,7 +3,7 @@
 sudo install helm --classic
 
 # create portworx-sc StorageClass
-kubectl apply -f portworx-sc.yaml
+kubectl apply -f pxd-portworx-sc.yaml
 
 # from https://central.portworx.com/specGen/px-backup-wizard, create and save spec to install namespace, PX-Central, and enable PX-Backup
 # namespace: central
