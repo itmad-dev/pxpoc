@@ -2,7 +2,6 @@
 ## artifacts, resources prep
 
 kubeadmin
-SNTrn-Dkpaq-aSbay-PFNyg
 https://api.dr-rhocp-01.testco.local:6443
 
 ##  DNS preparation
