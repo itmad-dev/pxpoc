@@ -4,7 +4,7 @@
 ## dr-rhocp01 deployed per lab-rhocp-vsphere-prem-01.txt or equivalent
 
 kubeadmin
-SNTrn-Dkpaq-aSbay-PFNyg
+
 https://api.dr-rhocp-01.testco.local:6443
 
 
