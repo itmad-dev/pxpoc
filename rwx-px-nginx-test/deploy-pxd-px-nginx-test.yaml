@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: px-pxd-nginx-test
+  namespace: default
+  labels:
+    app: px-pxd-nginx-test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: px-pxd-nginx-test
+  template:
+    metadata:
+      labels:
+        app: px-pxd-nginx-test
+    spec:
+      containers:
+        - name: px-nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              name: "http-server"
+          volumeMounts:
+            - mountPath: "/usr/share/nginx"
+              name: vol-px-01
+      volumes:
+        - name: vol-px-01
+          persistentVolumeClaim:
+           claimName: pvc-repl3-01
