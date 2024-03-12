@@ -4,5 +4,5 @@ metadata:
   name: pxd-portworx-sc
 provisioner: pxd.portworx.com
 parameters:
-  repl: "3"
+  repl: "1"
 
