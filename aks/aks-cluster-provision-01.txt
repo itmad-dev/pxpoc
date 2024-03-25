@@ -1,0 +1,211 @@
+## aks cluster prep for PX poc
+## (1) control plane node
+## pxstore01 pool   # PX-E, PX-C, PX-B, storage pool
+#   (3) worker nodes
+#   px/metadata-node=true
+#   portworx.io/node-type=storage
+## pxnostore01 pool # present no storage, PVCs to PVs on pxstore01
+#   (2) worker nodes
+#   portworx.io/node-type=storageless
+## stork01 pool  # no PX-E storage used, stork for PX-Backup/restore
+#   (1) worker nodes
+#   px/enabled=false
+
+
+## azure portal with aks creation permissions
+#   Kubernetes services
+#    Create Kubernetes cluster
+#    Basics
+#    Project details
+#     Subscription
+#     New resource group: rg-aks-01
+#    Cluster details
+#     Preset configuration: Production Standard
+#     Cluster name: az-aks-01
+#     Region: (US) West US 2
+#     Availability zones: Zones 1,2,3
+#     AKS pricing tier: Free
+#     Kubernetes version: 1.27.7
+#     Automatic upgrade: disabled
+#     Authentication and Authorization: Local accounts with Kubernetes RBAC
+#    Node pools
+#    - Node pool name: control
+#      Mode: System
+#      OS SKU: Ubuntu Linux
+#      Availability zones: Zones 1,2,3
+#      Node size: Standard B2ms   # 2 vcpus, 4 Gib memory
+#      Scale method: manual
+#      Node count: 1
+#      Optional settings:
+#       Max pods per node: 110
+#       Enable public IP per node: [not selected]
+#      Labels:
+#       [none]
+#      Taints:
+#        [None]
+#    - Node pool name: pxstore01
+#      Mode: User
+#      OS SKU: Ubuntu Linux
+#      Availability zones: Zones 1,2,3
+#      Node size: Standard B4ms   # 2 vcpus, 16 Gib memory, Premium disk support
+#      Scale method: manual
+#      Node count: 3
+#      Optional settings:
+#       Max pods per node: 110
+#       Enable public IP per node: [not selected]
+#      Labels:
+#        px/metadata-node=true
+#        portworx.io/node-type=storage
+#      Taints:
+#        [None]
+#    - Node pool name: pxnostore01
+#      Mode: User
+#      OS SKU: Ubuntu Linux
+#      Availability zones: [None]
+#      Node size: Standard B4ms   # 2 vcpus, 16 Gib memory, Premium disk support
+#      Scale method: manual
+#      Node count: 2
+#      Optional settings:
+#       Max pods per node: 30
+#       Enable public IP per node: [not selected]
+#      Labels:
+#        portworx.io/node-type=storageless
+#      Taints:
+#        [None]
+#    - Node pool name: stork01
+#      Mode: User
+#      OS SKU: Ubuntu Linux
+#      Availability zones: [None]
+#      Node size: Standard B2ms   # 2 vcpus, 4 Gib memory
+#      Scale method: manual
+#      Node count: 2
+#      Optional settings:
+#       Max pods per node: 30
+#       Enable public IP per node: [not selected]
+#      Labels:
+#        px/enabled=false
+#      Taints:
+#        [None]
+#    Enable virtual nodes: [not selected]
+#    Node pool OS disk encryption: [Default] Encryption at-rest with a platform-managed key
+#    Networking
+#      Private access
+#       Enable private cluster: [not selected]
+#      Public access
+#       Set authorized IP ranges: [not selected]
+#      Container networking
+#       Network configuration: Azure CNI
+#       Bring your own virtual network: [not selected]
+#      DNS name prefix: az-aks-01-dns
+#      Network policy: Calico
+#      Load balancer: Standard
+#    Integrations
+#      Microsoft Defender for Cloud [included]
+#      Azure Container Registry
+#        container registry: [none]
+#      Azure Policy
+#       Azure Policy: Enabled
+#    Monitoring
+#      Default configuration
+#         Container logs and events
+#           Log Analytics workspace:  workspace-testcolab-01
+#         Prometheus metrics
+#           Azure Monitor workspace:  (New) defaultazuremonitorworkspace-wus2
+#         Alert rules
+#           Platform metric alerts: 2/2 enabled
+#         Grafana visualizations
+#           Grafana workspace: (New) grafana-20240102142818
+#    Advanced
+#      Enable secret store CSI driver: [not selected]
+#      Infrastructure resource group: MC_rg-aks-01_az-aks-01_westus2  # MC_[resource group]_[cluster]_[region]
+#    Tags
+#      [none]
+# Click Create Cluster
+
+## Upon successful cluster creation, get/add kubeconfig to .kube/config
+   az aks get-credentials --resource-group rg-aks-01 --name az-aks-01
+    Merged "az-aks-01" as current context in /home/testcoadmin/.kube/config
+
+
+########################## split to px-e-aks-01.txt ###############################
+
+## Create a service principal for Portworx custom role
+#    az aks show -n az-aks-01 -g rg-aks-01 | jq -r '.nodeResourceGroup'
+#    az ad sp create-for-rbac --role=role-portworx --scopes="/subscriptions/[subscription id]/resourceGroups/MC_rg-aks-01_az-aks-01_westus2"
+#    Creating 'role-portworx' role assignment under scope '/subscriptions/[subscription id]/resourceGroups/MC_rg-aks-01_az-aks-01_westus2'
+#    {
+#      "appId": "[app id]",
+#      "displayName": "azure-cli-2024-01-02-23-09-48",
+#      "password": "[password]",
+#      "tenant": "[tenant id]"
+#    }
+#
+# Create a secret to give the Portworx custom role access to the Azure API
+#   kubectl create secret generic -n portworx px-azure --from-literal=AZURE_TENANT_ID=[tenant id] \
+#                                                      --from-literal=AZURE_CLIENT_ID=[app id] \
+#                                                      --from-literal=AZURE_CLIENT_SECRET=[password]
+#
+#
+
+## from CENTRAL.PORTWORX.COM, create and save Portworx Operator and StorageCluster specs
+# Upper left, click Product Catalog
+# From the Portworx Enterprise box, click Continue
+# From the Portworx Enterprise box, click Continue
+# Select the latest Portworx version
+# Step 1. Select Your Platform
+#   Platform: Azure
+# Step 2: Select Kubernetes Distribution
+#   Click Customize
+# [Go directly to] Summary
+#   Click Customize
+# Basic
+#   Kubernetes version: [based on below command from CONTROL PLANE NODE]
+#      (kubectl version --short 2>&1 || kubectl version) | awk -Fv '/Server Version: / {print $3}'
+#   Namespace: portworx
+#   etcd: built-in
+# Click Next
+# Storage
+# Select Cloud Platform: Azure
+# Configure storage devices
+#   Select type of disk: Create using a Spec
+#     Select volume type: Premium
+#     Size (GB): 150
+#     Encryption: None
+#     Drive Tags: None
+#     Max storage nodes per availability zone: N/A
+#     Default IO Profile:  Auto
+#     Auto create journal device [selected]
+#     Managed Identity [not selected]
+# Click Next
+# Network
+#   data network interfaces: auto
+#   management network interface: auto
+#   advanced, starting port for Portworx services: 9001
+# Click Next
+# Customize
+#   Azure Kubernetes Service AKS  [selected]
+# Environment variables
+#    ENABLE_ASG_STORAGE_PARTITIONING = true
+# registry and image settings 
+# security settings enabling authorization [not selected]
+# enable stork, CSI, monitoring [telemetry not selected]
+# cluster name prefix px-cluster
+# secrets store type kubernetes
+# Click Finish
+# Spec Name: az-aks-01
+# Spec Tags: az-aks-01
+
+## Install operator
+kubectl apply -f 'https://install.portworx.com/3.0?comp=pxoperator&kbver=1.27.7&ns=portworx'
+
+
+## Install StorageCluster
+
+kubectl apply -f 'https://install.portworx.com/3.0?operator=true&mc=false&kbver=1.27.7&ns=portworx&b=true&iop=6&mz=8&s=%22type%3DPremium_LRS%2Csize%3D150%22&j=auto&c=px-cluster-48d58397-321d-4b72-9b46-f6eb69714b7a&aks=true&stork=true&csi=true&mon=true&tel=false&st=k8s&e=ENABLE_ASG_STORAGE_PARTITIONING%3Dtrue&promop=true'
+storagecluster.core.libopenstorage.org/px-cluster-8f774f61-d718-4a42-8ddf-ef511605c341 created
+
+
+
+
+
+
