@@ -1,9 +1,0 @@
-px-prep-disaggregated-aks-cluster-provision-proc-rvw-01.docx
-px-enterprise-disaggregated-aks-deployment-proc-rvw-01.docx
-postgresql-ha-px-enterprise-aks-deployment-proc-rvw-01.docx
-
-px-prep-disaggregated-aks-cluster-provision-internal-proc-01.txt
-px-enterprise-disaggregated-aks-deployment-internal-proc-01.txt
-postgresql-ha-px-enterprise-aks-deployment-internal-proc-01.txt
-
-
